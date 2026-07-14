@@ -1,0 +1,24 @@
+# =============================================================
+# Lung Cancer Prediction using Deep Neural Network
+# Python Dependencies
+# =============================================================
+
+# --- Web Framework ---
+Flask==3.1.1
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-WTF==1.2.2
+
+# --- Database ---
+SQLAlchemy==2.0.41
+
+# --- Machine Learning (for future use) ---
+tensorflow==2.19.0
+scikit-learn==1.7.0
+pandas==2.3.0
+numpy==1.26.4
+
+# --- Utilities ---
+Werkzeug==3.1.3
+Jinja2==3.1.6
+python-dotenv==1.1.0

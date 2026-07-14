@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction Report - #{{ record.id }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #fff; color: #333; font-family: Arial, sans-serif; }
+        .report-header { border-bottom: 2px solid #0d6efd; padding-bottom: 20px; margin-bottom: 30px; }
+        .report-title { font-weight: bold; color: #0d6efd; }
+        .section-title { font-weight: bold; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .detail-row { margin-bottom: 10px; }
+        .detail-label { font-weight: bold; width: 200px; display: inline-block; }
+        @media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="text-end mb-4 no-print">
+            <button onclick="window.print()" class="btn btn-primary">Print Report</button>
+            <button onclick="window.close()" class="btn btn-secondary">Close</button>
+        </div>
+
+        <div class="report-header text-center">
+            <h2 class="report-title">Lung Cancer Risk Assessment Report</h2>
+            <p class="mb-0">Generated on: {{ record.created_at.strftime('%d %B %Y, %I:%M %p') if record.created_at else 'N/A' }}</p>
+            <p class="mb-0 text-muted">Report ID: #{{ record.id }}</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h4 class="section-title">Patient Details</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span>{{ record.patient_name if record.patient_name else 'N/A' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Age:</span>
+                    <span>{{ record.age }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Gender:</span>
+                    <span>{{ 'Male' if record.gender == 1 else 'Female' }}</span>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h4 class="section-title">Prediction Result</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Prediction:</span>
+                    <strong>{{ record.prediction }}</strong>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Confidence:</span>
+                    <span>{{ "%.1f%%"|format(record.confidence) if record.confidence else 'N/A' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Risk Level:</span>
+                    <strong class="{% if risk_level == 'High' %}text-danger{% elif risk_level == 'Medium' %}text-warning{% else %}text-success{% endif %}">
+                        {{ risk_level }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h4 class="section-title">Clinical Factors</h4>
+            <div class="row">
+                <div class="col-6">
+                    <ul class="list-unstyled">
+                        <li><strong>Smoking:</strong> {{ 'Yes' if record.smoking == 1 else 'No' }}</li>
+                        <li><strong>Yellow Fingers:</strong> {{ 'Yes' if record.yellow_fingers == 1 else 'No' }}</li>
+                        <li><strong>Anxiety:</strong> {{ 'Yes' if record.anxiety == 1 else 'No' }}</li>
+                        <li><strong>Peer Pressure:</strong> {{ 'Yes' if record.peer_pressure == 1 else 'No' }}</li>
+                        <li><strong>Chronic Disease:</strong> {{ 'Yes' if record.chronic_disease == 1 else 'No' }}</li>
+                        <li><strong>Fatigue:</strong> {{ 'Yes' if record.fatigue == 1 else 'No' }}</li>
+                        <li><strong>Allergy:</strong> {{ 'Yes' if record.allergy == 1 else 'No' }}</li>
+                    </ul>
+                </div>
+                <div class="col-6">
+                    <ul class="list-unstyled">
+                        <li><strong>Wheezing:</strong> {{ 'Yes' if record.wheezing == 1 else 'No' }}</li>
+                        <li><strong>Alcohol Consuming:</strong> {{ 'Yes' if record.alcohol_consuming == 1 else 'No' }}</li>
+                        <li><strong>Coughing:</strong> {{ 'Yes' if record.coughing == 1 else 'No' }}</li>
+                        <li><strong>Shortness of Breath:</strong> {{ 'Yes' if record.shortness_of_breath == 1 else 'No' }}</li>
+                        <li><strong>Swallowing Difficulty:</strong> {{ 'Yes' if record.swallowing_difficulty == 1 else 'No' }}</li>
+                        <li><strong>Chest Pain:</strong> {{ 'Yes' if record.chest_pain == 1 else 'No' }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 p-3 bg-light border rounded">
+            <strong>Medical Disclaimer:</strong> This prediction is generated by a machine learning model and is not a substitute for professional medical advice. Please consult a qualified healthcare provider for proper diagnosis and treatment.
+        </div>
+    </div>
+</body>
+</html>

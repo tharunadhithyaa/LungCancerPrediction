@@ -1,0 +1,332 @@
+<!--
+=============================================================
+Dashboard Page — Healthcare Theme
+Lung Cancer Prediction using Deep Neural Network
+=============================================================
+-->
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="page-title">
+                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">
+                        Welcome back, <strong class="text-primary">{{ current_user.full_name }}</strong>! 
+                        Here's your prediction overview.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('prediction.predict') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                        <i class="fas fa-plus-circle me-1"></i>New Prediction
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards Row -->
+        <div class="row g-4 mb-4">
+            <!-- Total Predictions -->
+            <div class="col-md-2 col-6">
+                <div class="dashboard-stat-card">
+                    <div class="stat-card-icon bg-primary-soft">
+                        <i class="fas fa-clipboard-list text-primary"></i>
+                    </div>
+                    <div class="stat-card-body">
+                        <h2 class="mb-0 fw-bold text-dark">{{ total_preds }}</h2>
+                        <p class="text-muted mb-0 small">Total</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Positive Results -->
+            <div class="col-md-2 col-6">
+                <div class="dashboard-stat-card">
+                    <div class="stat-card-icon bg-danger-soft">
+                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                    </div>
+                    <div class="stat-card-body">
+                        <h2 class="mb-0 fw-bold text-dark">{{ positive_preds }}</h2>
+                        <p class="text-muted mb-0 small">Positive</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Negative Results -->
+            <div class="col-md-2 col-6">
+                <div class="dashboard-stat-card">
+                    <div class="stat-card-icon bg-success-soft">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    <div class="stat-card-body">
+                        <h2 class="mb-0 fw-bold text-dark">{{ negative_preds }}</h2>
+                        <p class="text-muted mb-0 small">Negative</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Today's Predictions -->
+            <div class="col-md-3 col-6">
+                <div class="dashboard-stat-card">
+                    <div class="stat-card-icon bg-info-soft">
+                        <i class="fas fa-calendar-day text-info"></i>
+                    </div>
+                    <div class="stat-card-body">
+                        <h2 class="mb-0 fw-bold text-dark">{{ today_preds }}</h2>
+                        <p class="text-muted mb-0 small">Today's</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Average Confidence -->
+            <div class="col-md-3 col-6">
+                <div class="dashboard-stat-card">
+                    <div class="stat-card-icon bg-warning-soft">
+                        <i class="fas fa-percentage text-warning"></i>
+                    </div>
+                    <div class="stat-card-body">
+                        <h2 class="mb-0 fw-bold text-dark">{{ avg_confidence }}%</h2>
+                        <p class="text-muted mb-0 small">Avg Confidence</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 text-center">
+                        <h5 class="fw-bold mb-4">Cases Overview</h5>
+                        <div style="position: relative; height: 250px; width: 100%;">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 text-center">
+                        <h5 class="fw-bold mb-4">Daily Predictions</h5>
+                        <div style="position: relative; height: 250px; width: 100%;">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 text-center">
+                        <h5 class="fw-bold mb-4">Avg Confidence Trend</h5>
+                        <div style="position: relative; height: 250px; width: 100%;">
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Info Card -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="user-avatar-lg mx-auto mb-3">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h5 class="fw-bold">{{ current_user.full_name }}</h5>
+                        <p class="text-muted small mb-1">{{ current_user.email }}</p>
+                        <p class="text-muted small mb-3">@{{ current_user.username }}</p>
+                        <span class="badge bg-primary-soft text-primary rounded-pill px-3 py-2">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Joined {{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else 'N/A' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <a href="{{ url_for('prediction.predict') }}" class="quick-action-card">
+                                    <i class="fas fa-stethoscope text-primary fa-2x mb-2"></i>
+                                    <h6 class="mb-0">New Prediction</h6>
+                                    <small class="text-muted">Run a new assessment</small>
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('prediction.history') }}" class="quick-action-card">
+                                    <i class="fas fa-history text-info fa-2x mb-2"></i>
+                                    <h6 class="mb-0">View History</h6>
+                                    <small class="text-muted">Past predictions</small>
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('main.about') }}" class="quick-action-card">
+                                    <i class="fas fa-info-circle text-success fa-2x mb-2"></i>
+                                    <h6 class="mb-0">About Project</h6>
+                                    <small class="text-muted">Learn more</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Predictions Table -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-clock me-2 text-primary"></i>Recent Predictions
+                    </h5>
+                    {% if predictions %}
+                    <a href="{{ url_for('prediction.history') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body px-4 pb-4">
+                {% if predictions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Smoking</th>
+                                    <th>Result</th>
+                                    <th>Confidence</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in predictions %}
+                                <tr>
+                                    <td><strong>{{ p.id }}</strong></td>
+                                    <td>{{ p.patient_name if p.patient_name else 'N/A' }}</td>
+                                    <td>{{ p.created_at.strftime('%d %b %Y') if p.created_at else 'N/A' }}</td>
+                                    <td>{{ p.age }}</td>
+                                    <td>
+                                        <i class="fas fa-{{ 'mars text-primary' if p.gender == 1 else 'venus text-danger' }} me-1"></i>
+                                        {{ 'Male' if p.gender == 1 else 'Female' }}
+                                    </td>
+                                    <td>
+                                        {% if p.smoking == 1 %}
+                                            <span class="badge bg-warning text-dark rounded-pill"><i class="fas fa-smoking me-1"></i>Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-success rounded-pill"><i class="fas fa-ban me-1"></i>No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if p.prediction == 'Positive' %}
+                                            <span class="badge bg-danger rounded-pill px-3"><i class="fas fa-exclamation-circle me-1"></i>Positive</span>
+                                        {% elif p.prediction == 'Negative' %}
+                                            <span class="badge bg-success rounded-pill px-3"><i class="fas fa-check-circle me-1"></i>Negative</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill px-3"><i class="fas fa-hourglass-half me-1"></i>{{ p.prediction }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ "%.1f%%"|format(p.confidence) if p.confidence else 'N/A' }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('prediction.result', record_id=p.id) }}"
+                                           class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No predictions yet</h5>
+                        <p class="text-muted mb-3">Start by making your first prediction!</p>
+                        <a href="{{ url_for('prediction.predict') }}" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-plus-circle me-1"></i>New Prediction
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartDates = {{ chart_dates | safe }};
+    const chartCounts = {{ chart_counts | safe }};
+    const chartConfDates = {{ chart_conf_dates | safe }};
+    const chartConfValues = {{ chart_conf_values | safe }};
+
+    // Pie Chart
+    new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Positive', 'Negative'],
+            datasets: [{
+                data: [{{ positive_preds }}, {{ negative_preds }}],
+                backgroundColor: ['#dc3545', '#198754']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Bar Chart
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: chartDates,
+            datasets: [{
+                label: 'Predictions',
+                data: chartCounts,
+                backgroundColor: '#0d6efd'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Line Chart
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: chartConfDates,
+            datasets: [{
+                label: 'Avg Confidence (%)',
+                data: chartConfValues,
+                borderColor: '#ffc107',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { min: 0, max: 100 }
+            }
+        }
+    });
+</script>
+{% endblock %}

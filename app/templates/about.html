@@ -1,0 +1,138 @@
+<!--
+=============================================================
+About Page — Healthcare Theme
+Lung Cancer Prediction using Deep Neural Network
+=============================================================
+-->
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<section class="page-hero-section">
+    <div class="container text-center">
+        <span class="badge badge-medical mb-3">
+            <i class="fas fa-info-circle me-1"></i> About
+        </span>
+        <h1 class="section-title text-white">About This Project</h1>
+        <p class="text-white-50 mx-auto" style="max-width: 600px;">
+            Learn more about the Lung Cancer Prediction System and its mission.
+        </p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- About the Project -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="about-icon bg-primary-soft me-3">
+                                <i class="fas fa-bullseye text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">About the Project</h4>
+                        </div>
+                        <p class="text-muted">
+                            The Lung Cancer Prediction System helps predict the likelihood of lung cancer using patient health information and a Deep Neural Network. By analyzing various clinical factors and lifestyle choices, the system aims to identify potential risks.
+                        </p>
+                        <p class="text-muted mb-0">
+                            Please note that this system is designed for educational and demonstration purposes only and is not a substitute for professional medical diagnosis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Our Mission -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="about-icon bg-success-soft me-3">
+                                <i class="fas fa-heartbeat text-success"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">Our Mission</h4>
+                        </div>
+                        <p class="text-muted">
+                            Early detection is crucial in the fight against lung cancer, as it significantly improves treatment outcomes and survival rates.
+                        </p>
+                        <p class="text-muted mb-0">
+                            Our mission is to explore how Artificial Intelligence (AI) can assist healthcare professionals by providing data-driven insights and risk assessments, ultimately supporting the medical community in identifying at-risk individuals sooner.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="about-icon bg-warning-soft me-3">
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">Key Features</h4>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="about-feature-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>Patient prediction
+                            </li>
+                            <li class="about-feature-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>Confidence score
+                            </li>
+                            <li class="about-feature-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>Risk level classification
+                            </li>
+                            <li class="about-feature-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>Prediction history
+                            </li>
+                            <li class="about-feature-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>Dashboard analytics
+                            </li>
+                            <li class="about-feature-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>Printable reports
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="about-icon bg-info-soft me-3">
+                                <i class="fas fa-cogs text-info"></i>
+                            </div>
+                            <h4 class="fw-bold mb-0">How It Works</h4>
+                        </div>
+                        <ol class="about-features-list text-muted">
+                            <li class="mb-2"><strong>User enters patient information:</strong> Submit clinical and lifestyle data via a simple form.</li>
+                            <li class="mb-2"><strong>The trained Deep Neural Network processes the data:</strong> The AI model scales and analyzes the input features.</li>
+                            <li class="mb-2"><strong>The model predicts the likelihood of lung cancer:</strong> A risk level and confidence score are generated.</li>
+                            <li class="mb-0"><strong>Results are stored in the database and displayed to the user:</strong> View reports and historical analytics seamlessly.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-warning d-flex align-items-start rounded-3 shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-triangle me-3 mt-1 fs-4"></i>
+                    <div>
+                        <h5 class="alert-heading fw-bold mb-2">Medical Disclaimer</h5>
+                        <p class="mb-0">
+                            The predictions are generated by a machine learning model for educational purposes and should not replace medical advice from qualified healthcare professionals.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

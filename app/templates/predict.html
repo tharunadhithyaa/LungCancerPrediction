@@ -1,0 +1,269 @@
+<!--
+=============================================================
+Prediction Form Page — Healthcare Theme
+Lung Cancer Prediction using Deep Neural Network
+=============================================================
+Collects Patient Name + 15 clinical features.
+-->
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <span class="badge badge-medical mb-2">
+                <i class="fas fa-stethoscope me-1"></i> Risk Assessment
+            </span>
+            <h2 class="section-title">Lung Cancer Risk Prediction</h2>
+            <p class="section-subtitle">
+                Fill in the patient's details and clinical symptoms below. All fields are required.
+            </p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="card border-0 shadow rounded-4">
+                    <div class="card-body p-4 p-md-5">
+                        <form method="POST" action="{{ url_for('prediction.predict') }}" id="predictForm" novalidate>
+
+                            <!-- ===== SECTION 1: Patient Information ===== -->
+                            <div class="form-section mb-4">
+                                <h5 class="form-section-title">
+                                    <i class="fas fa-user-injured me-2"></i>Patient Information
+                                </h5>
+                                <div class="row g-3">
+                                    <!-- Patient Name -->
+                                    <div class="col-md-5">
+                                        <label for="patient_name" class="form-label fw-semibold">
+                                            <i class="fas fa-id-card me-1 text-primary"></i>Patient Name
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="patient_name"
+                                               name="patient_name" placeholder="Enter patient's full name" required>
+                                        <div class="invalid-feedback">Patient name is required.</div>
+                                    </div>
+                                    <!-- Age -->
+                                    <div class="col-md-3">
+                                        <label for="age" class="form-label fw-semibold">
+                                            <i class="fas fa-calendar-alt me-1 text-primary"></i>Age
+                                        </label>
+                                        <input type="number" class="form-control form-control-lg" id="age"
+                                               name="age" min="1" max="120" placeholder="e.g., 55" required>
+                                        <div class="invalid-feedback">Enter a valid age (1-120).</div>
+                                    </div>
+                                    <!-- Gender -->
+                                    <div class="col-md-4">
+                                        <label for="gender" class="form-label fw-semibold">
+                                            <i class="fas fa-venus-mars me-1 text-primary"></i>Gender
+                                        </label>
+                                        <select class="form-select form-select-lg" id="gender" name="gender" required>
+                                            <option value="" disabled selected>Select gender</option>
+                                            <option value="1">Male</option>
+                                            <option value="0">Female</option>
+                                        </select>
+                                        <div class="invalid-feedback">Please select a gender.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== SECTION 2: Lifestyle Factors ===== -->
+                            <div class="form-section mb-4">
+                                <h5 class="form-section-title">
+                                    <i class="fas fa-smoking me-2"></i>Lifestyle Factors
+                                </h5>
+                                <div class="row g-3">
+                                    <!-- Smoking -->
+                                    <div class="col-md-4">
+                                        <label for="smoking" class="form-label fw-semibold">Smoking</label>
+                                        <select class="form-select" id="smoking" name="smoking" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                        <div class="invalid-feedback">This field is required.</div>
+                                    </div>
+                                    <!-- Alcohol -->
+                                    <div class="col-md-4">
+                                        <label for="alcohol" class="form-label fw-semibold">Alcohol Consumption</label>
+                                        <select class="form-select" id="alcohol" name="alcohol" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                        <div class="invalid-feedback">This field is required.</div>
+                                    </div>
+                                    <!-- Peer Pressure -->
+                                    <div class="col-md-4">
+                                        <label for="peer_pressure" class="form-label fw-semibold">Peer Pressure</label>
+                                        <select class="form-select" id="peer_pressure" name="peer_pressure" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                        <div class="invalid-feedback">This field is required.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== SECTION 3: Medical History ===== -->
+                            <div class="form-section mb-4">
+                                <h5 class="form-section-title">
+                                    <i class="fas fa-notes-medical me-2"></i>Medical History
+                                </h5>
+                                <div class="row g-3">
+                                    <!-- Chronic Disease -->
+                                    <div class="col-md-4">
+                                        <label for="chronic_disease" class="form-label fw-semibold">Chronic Disease</label>
+                                        <select class="form-select" id="chronic_disease" name="chronic_disease" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                        <div class="invalid-feedback">This field is required.</div>
+                                    </div>
+                                    <!-- Allergy -->
+                                    <div class="col-md-4">
+                                        <label for="allergy" class="form-label fw-semibold">Allergy</label>
+                                        <select class="form-select" id="allergy" name="allergy" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                        <div class="invalid-feedback">This field is required.</div>
+                                    </div>
+                                    <!-- Anxiety -->
+                                    <div class="col-md-4">
+                                        <label for="anxiety" class="form-label fw-semibold">Anxiety</label>
+                                        <select class="form-select" id="anxiety" name="anxiety" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                        <div class="invalid-feedback">This field is required.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== SECTION 4: Clinical Symptoms ===== -->
+                            <div class="form-section mb-4">
+                                <h5 class="form-section-title">
+                                    <i class="fas fa-heartbeat me-2"></i>Clinical Symptoms
+                                </h5>
+                                <p class="text-muted small mb-3">
+                                    Select <strong>"Yes"</strong> or <strong>"No"</strong> for each symptom.
+                                </p>
+                                <div class="row g-3">
+                                    <!-- Yellow Fingers -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="yellow_fingers" class="form-label fw-semibold">Yellow Fingers</label>
+                                        <select class="form-select" id="yellow_fingers" name="yellow_fingers" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Fatigue -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="fatigue" class="form-label fw-semibold">Fatigue</label>
+                                        <select class="form-select" id="fatigue" name="fatigue" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Wheezing -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="wheezing" class="form-label fw-semibold">Wheezing</label>
+                                        <select class="form-select" id="wheezing" name="wheezing" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Coughing -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="coughing" class="form-label fw-semibold">Coughing</label>
+                                        <select class="form-select" id="coughing" name="coughing" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Shortness of Breath -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="shortness_of_breath" class="form-label fw-semibold">Shortness of Breath</label>
+                                        <select class="form-select" id="shortness_of_breath" name="shortness_of_breath" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Swallowing Difficulty -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="swallowing_difficulty" class="form-label fw-semibold">Swallowing Difficulty</label>
+                                        <select class="form-select" id="swallowing_difficulty" name="swallowing_difficulty" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <!-- Chest Pain -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <label for="chest_pain" class="form-label fw-semibold">Chest Pain</label>
+                                        <select class="form-select" id="chest_pain" name="chest_pain" required>
+                                            <option value="" disabled selected>Select</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== Submit & Reset Buttons ===== -->
+                            <div class="d-flex gap-3 justify-content-center mt-4 pt-3 border-top">
+                                <button type="submit" id="submitBtn" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                                    <span id="btnText"><i class="fas fa-brain me-2"></i>Run Prediction</span>
+                                    <span id="btnSpinner" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                                    <span id="btnLoadingText" class="d-none">Analyzing Data...</span>
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                    <i class="fas fa-redo me-1"></i>Reset Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="alert alert-info d-flex align-items-start mt-4 rounded-3 shadow-sm" role="alert">
+                    <i class="fas fa-info-circle me-3 mt-1 fs-5"></i>
+                    <div>
+                        <strong>Note:</strong> This tool uses a Deep Neural Network for risk prediction.
+                        It is <strong>not</strong> a substitute for professional medical diagnosis. 
+                        Please consult a qualified healthcare provider for proper evaluation.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Bootstrap form validation and loading indicator
+    document.getElementById('predictForm').addEventListener('submit', function(e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        } else {
+            // Form is valid, show loading spinner
+            document.getElementById('btnText').classList.add('d-none');
+            document.getElementById('btnSpinner').classList.remove('d-none');
+            document.getElementById('btnLoadingText').classList.remove('d-none');
+            document.getElementById('submitBtn').classList.add('disabled');
+        }
+        this.classList.add('was-validated');
+    });
+</script>
+{% endblock %}

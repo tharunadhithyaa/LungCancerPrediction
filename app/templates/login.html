@@ -1,0 +1,122 @@
+<!--
+=============================================================
+Login Page — Healthcare Theme
+Lung Cancer Prediction using Deep Neural Network
+=============================================================
+-->
+{% extends "base.html" %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-auth">
+            <!-- Left Illustration -->
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="auth-illustration text-center">
+                    <div class="auth-art">
+                        <i class="fas fa-lungs fa-5x text-primary mb-4" style="opacity: 0.15;"></i>
+                        <h3 class="text-dark">Welcome to LungAI</h3>
+                        <p class="text-muted">
+                            Sign in to access your personalized dashboard, 
+                            make predictions, and view your history.
+                        </p>
+                        <div class="d-flex justify-content-center gap-4 mt-4">
+                            <div class="auth-feature">
+                                <i class="fas fa-shield-alt text-primary fs-4"></i>
+                                <small class="d-block mt-1 text-muted">Secure</small>
+                            </div>
+                            <div class="auth-feature">
+                                <i class="fas fa-bolt text-warning fs-4"></i>
+                                <small class="d-block mt-1 text-muted">Fast</small>
+                            </div>
+                            <div class="auth-feature">
+                                <i class="fas fa-chart-line text-success fs-4"></i>
+                                <small class="d-block mt-1 text-muted">Accurate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="col-lg-5 col-md-8">
+                <div class="auth-card">
+                    <div class="text-center mb-4">
+                        <div class="auth-icon-wrap mb-3">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <h3 class="fw-bold">Sign In</h3>
+                        <p class="text-muted">Enter your credentials to continue</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" novalidate>
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label fw-semibold">
+                                <i class="fas fa-user me-1 text-primary"></i>Username
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="username"
+                                   name="username" placeholder="Enter your username" required autofocus>
+                            <div class="invalid-feedback">Please enter your username.</div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold">
+                                <i class="fas fa-lock me-1 text-primary"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-lg" id="password"
+                                       name="password" placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword"
+                                        title="Toggle password visibility">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">Please enter your password.</div>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-0">
+                            Don't have an account?
+                            <a href="{{ url_for('auth.register') }}" class="fw-semibold">Create one here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const pw = document.getElementById('password');
+        const icon = this.querySelector('i');
+        if (pw.type === 'password') {
+            pw.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            pw.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+
+    // Bootstrap form validation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        this.classList.add('was-validated');
+    });
+</script>
+{% endblock %}

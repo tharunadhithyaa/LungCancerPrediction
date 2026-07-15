@@ -70,17 +70,28 @@ def predict():
     """
 
     if request.method == "POST":
+        print(f"DEBUG: Received POST request at /predict/. Form keys: {list(request.form.keys())}")
+        for key, val in request.form.items():
+            print(f"  DEBUG: form['{key}'] = '{val}'")
+
+        # 1 & 2. Try form data extraction and validation
         try:
-            # ----- Collect patient name and all 15 input features -----
+            print("DEBUG: Extracting patient_name and age")
             patient_name = request.form.get("patient_name", "Unknown").strip()
-            age = int(request.form.get("age", -1))
+            age_raw = request.form.get("age")
+            print(f"DEBUG: Raw age = {age_raw}")
+            age = int(age_raw) if age_raw else -1
             if not (1 <= age <= 120):
                 raise ValueError("Age must be between 1 and 120.")
                 
-            gender = int(request.form.get("gender", -1))
+            print("DEBUG: Extracting gender")
+            gender_raw = request.form.get("gender")
+            print(f"DEBUG: Raw gender = {gender_raw}")
+            gender = int(gender_raw) if gender_raw is not None else -1
             if gender not in [0, 1]:
                 raise ValueError("Invalid gender selection.")
                 
+            print("DEBUG: Extracting symptoms")
             smoking = int(request.form.get("smoking", -1))
             yellow_fingers = int(request.form.get("yellow_fingers", -1))
             anxiety = int(request.form.get("anxiety", -1))
@@ -99,81 +110,103 @@ def predict():
                         fatigue, allergy, wheezing, alcohol_consuming, coughing,
                         shortness_of_breath, swallowing_difficulty, chest_pain]
                         
+            print(f"DEBUG: Symptoms parsed: {symptoms}")
             if any(s not in [0, 1] for s in symptoms):
                 raise ValueError("All clinical symptoms must be either Yes or No.")
 
-        except (ValueError, TypeError) as e:
-            print(f"Input validation error: {str(e)}")
+        except Exception as e:
+            import traceback
+            print(f"DEBUG ERROR: Form extraction/validation failed: {str(e)}")
+            traceback.print_exc()
             flash(f"Invalid input: {str(e)}", "danger")
             return render_template("predict.html", title="Predict")
             
-        # Lazy load model & scaler inside worker handling request
+        # 3. Lazy load model & scaler inside worker handling request
         try:
+            print("DEBUG: Loading ML resources (model & scaler)")
             model, scaler = load_ml_resources()
         except Exception as e:
             import traceback
-            print(f"CRITICAL: Failed to load ML model or scaler: {str(e)}")
+            print(f"DEBUG ERROR: Failed to load ML model or scaler: {str(e)}")
             traceback.print_exc()
             flash("Machine learning model is currently unavailable. Please contact support.", "warning")
             return redirect(url_for("auth.dashboard"))
 
+        # 4 & 5. Preprocessing (Numpy creation & scaling)
         try:
-            # Prepare feature array in the exact order as training
             input_features = [
                 gender, age, smoking, yellow_fingers, anxiety, peer_pressure,
                 chronic_disease, fatigue, allergy, wheezing, alcohol_consuming,
                 coughing, shortness_of_breath, swallowing_difficulty, chest_pain
             ]
-            print(f"Running prediction for patient '{patient_name}' with features: {input_features}")
-            
+            print(f"DEBUG: Feature list = {input_features}")
             features_array = np.array(input_features).reshape(1, -1)
+            print(f"DEBUG: Features array shape = {features_array.shape}")
             scaled_features = scaler.transform(features_array)
-            
-            # Using model() functional call is faster, thread-safe, and avoids high-overhead data adapter loops
+            print("DEBUG: Scaler transform successful")
+        except Exception as e:
+            import traceback
+            print(f"DEBUG ERROR: Numpy creation or scaling failed: {str(e)}")
+            traceback.print_exc()
+            flash("An error occurred during prediction preprocessing.", "danger")
+            return redirect(url_for("prediction.predict"))
+
+        # 6. Model prediction and outcome conversion
+        try:
+            print("DEBUG: Executing model prediction")
             probability_tensor = model(scaled_features, training=False)
             if hasattr(probability_tensor, 'numpy'):
                 probability = float(probability_tensor.numpy()[0][0])
             else:
                 probability = float(probability_tensor[0][0])
-                
-            print(f"Prediction result raw probability: {probability}")
+            print(f"DEBUG: Raw probability = {probability}")
             
             prediction_result = 'Positive' if probability > 0.5 else 'Negative'
             confidence_score = float(probability * 100) if prediction_result == 'Positive' else float((1 - probability) * 100)
-            print(f"Outcome: {prediction_result} | Confidence: {confidence_score:.2f}%")
-            
+            print(f"DEBUG: Outcome = {prediction_result} | Confidence = {confidence_score:.2f}%")
         except Exception as e:
             import traceback
-            print(f"CRITICAL: Error during prediction computation: {str(e)}")
+            print(f"DEBUG ERROR: Model prediction or outcome conversion failed: {str(e)}")
             traceback.print_exc()
             flash("An error occurred during prediction computation.", "danger")
             return redirect(url_for("prediction.predict"))
 
-        # ----- Save the prediction record to the database -----
-        record = Prediction(
-            user_id=current_user.id,
-            patient_name=patient_name,
-            age=age,
-            gender=gender,
-            smoking=smoking,
-            yellow_fingers=yellow_fingers,
-            anxiety=anxiety,
-            peer_pressure=peer_pressure,
-            chronic_disease=chronic_disease,
-            fatigue=fatigue,
-            allergy=allergy,
-            wheezing=wheezing,
-            alcohol_consuming=alcohol_consuming,
-            coughing=coughing,
-            shortness_of_breath=shortness_of_breath,
-            swallowing_difficulty=swallowing_difficulty,
-            chest_pain=chest_pain,
-            prediction=prediction_result,
-            confidence=confidence_score,
-        )
-
-        db.session.add(record)
-        db.session.commit()
+        # 7. Database insertion and transaction commit
+        try:
+            print("DEBUG: Instantiating Prediction record")
+            record = Prediction(
+                user_id=current_user.id,
+                patient_name=patient_name,
+                age=age,
+                gender=gender,
+                smoking=smoking,
+                yellow_fingers=yellow_fingers,
+                anxiety=anxiety,
+                peer_pressure=peer_pressure,
+                chronic_disease=chronic_disease,
+                fatigue=fatigue,
+                allergy=allergy,
+                wheezing=wheezing,
+                alcohol_consuming=alcohol_consuming,
+                coughing=coughing,
+                shortness_of_breath=shortness_of_breath,
+                swallowing_difficulty=swallowing_difficulty,
+                chest_pain=chest_pain,
+                prediction=prediction_result,
+                confidence=confidence_score,
+            )
+            print("DEBUG: Adding record to session")
+            db.session.add(record)
+            print("DEBUG: Committing transaction to database")
+            db.session.commit()
+            print(f"DEBUG: Database insert successful. Record ID = {record.id}")
+        except Exception as e:
+            import traceback
+            print(f"DEBUG ERROR: Database insertion/commit failed: {str(e)}")
+            traceback.print_exc()
+            db.session.rollback()
+            flash("Prediction succeeded, but could not be saved to history.", "danger")
+            return redirect(url_for("prediction.predict"))
 
         flash("Prediction submitted successfully!", "success")
         return redirect(url_for("prediction.result", record_id=record.id))

@@ -1,4 +1,5 @@
 import os
+import random
 import pandas as pd
 import numpy as np
 import joblib
@@ -11,6 +12,12 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Input
 
 import matplotlib.pyplot as plt
+
+# Set random seeds for reproducibility
+SEED = 42
+random.seed(SEED)
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
 # 1. Load the dataset
 data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'survey_lung_cancer.csv')
@@ -122,4 +129,3 @@ scaler_path = os.path.join(model_dir, 'scaler.pkl')
 joblib.dump(scaler, scaler_path)
 print(f"Scaler saved to {scaler_path}")
 print("Training complete.")
-

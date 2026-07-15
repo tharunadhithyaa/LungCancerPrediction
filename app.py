@@ -16,5 +16,5 @@ app = create_app(os.environ.get("FLASK_CONFIG", "development"))
 
 if __name__ == "__main__":
     # Run the Flask development server
-    # Host [IP_ADDRESS] allows access from external devices on the network
-    app.run(host="[IP_ADDRESS]", port=5000, debug=True)
+    # Host 0.0.0.0 allows access from external devices on the network
+    app.run(host="0.0.0.0", port=5000, debug=True)

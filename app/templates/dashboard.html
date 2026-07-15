@@ -269,11 +269,22 @@ Lung Cancer Prediction using Deep Neural Network
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="dashboard-data" type="application/json">
+{
+    "chartDates": {{ chart_dates | tojson }},
+    "chartCounts": {{ chart_counts | tojson }},
+    "chartConfDates": {{ chart_conf_dates | tojson }},
+    "chartConfValues": {{ chart_conf_values | tojson }},
+    "positivePreds": {{ positive_preds | tojson }},
+    "negativePreds": {{ negative_preds | tojson }}
+}
+</script>
 <script>
-    const chartDates = {{ chart_dates | safe }};
-    const chartCounts = {{ chart_counts | safe }};
-    const chartConfDates = {{ chart_conf_dates | safe }};
-    const chartConfValues = {{ chart_conf_values | safe }};
+    var _dd = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const chartDates = _dd.chartDates;
+    const chartCounts = _dd.chartCounts;
+    const chartConfDates = _dd.chartConfDates;
+    const chartConfValues = _dd.chartConfValues;
 
     // Pie Chart
     new Chart(document.getElementById('pieChart'), {
@@ -281,7 +292,7 @@ Lung Cancer Prediction using Deep Neural Network
         data: {
             labels: ['Positive', 'Negative'],
             datasets: [{
-                data: [{{ positive_preds }}, {{ negative_preds }}],
+                data: [_dd.positivePreds, _dd.negativePreds],
                 backgroundColor: ['#dc3545', '#198754']
             }]
         },

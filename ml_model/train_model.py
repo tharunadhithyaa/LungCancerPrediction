@@ -4,11 +4,13 @@ import numpy as np
 import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Input
+
+import matplotlib.pyplot as plt
 
 # 1. Load the dataset
 data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'survey_lung_cancer.csv')
@@ -78,6 +80,35 @@ print(f"Recall:    {rec:.4f}")
 print(f"F1 Score:  {f1:.4f}")
 print(f"ROC AUC:   {roc_auc:.4f}")
 
+# 11b. Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+print(f"\nConfusion Matrix:")
+print(cm)
+
+# 11c. Classification Report
+print(f"\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=['Negative', 'Positive']))
+
+# 11d. Training Accuracy vs Validation Accuracy Graph
+plt.figure(figsize=(10, 5))
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training Accuracy vs Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+
+# 11e. Training Loss vs Validation Loss Graph
+plt.figure(figsize=(10, 5))
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training Loss vs Validation Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.show()
+
 # 12. Save the trained model
 model_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'model')
 os.makedirs(model_dir, exist_ok=True)
@@ -91,3 +122,4 @@ scaler_path = os.path.join(model_dir, 'scaler.pkl')
 joblib.dump(scaler, scaler_path)
 print(f"Scaler saved to {scaler_path}")
 print("Training complete.")
+

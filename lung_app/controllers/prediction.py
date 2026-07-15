@@ -22,21 +22,39 @@ from tensorflow.keras.models import load_model
 ml_model = None
 ml_scaler = None
 
-# We assume the model is in the 'model' directory at the root of the project.
-# lung_app/controllers/prediction.py -> lung_app/controllers -> lung_app -> root -> model
-model_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'model')
-model_path = os.path.join(model_dir, 'lung_model.h5')
-scaler_path = os.path.join(model_dir, 'scaler.pkl')
-
-try:
-    if os.path.exists(model_path) and os.path.exists(scaler_path):
-        ml_model = load_model(model_path)
+def load_ml_resources():
+    """
+    Load the TensorFlow model and Scaler lazily.
+    This prevents TensorFlow initialization before Gunicorn forks the worker processes,
+    avoiding deadlocks, thread conflicts, or segmentation faults.
+    """
+    global ml_model, ml_scaler
+    if ml_model is None or ml_scaler is None:
+        model_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'model')
+        model_path = os.path.join(model_dir, 'lung_model.h5')
+        scaler_path = os.path.join(model_dir, 'scaler.pkl')
+        
+        print(f"Lazy-loading ML resources. Model path: {model_path}, Scaler path: {scaler_path}")
+        
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model file not found at {model_path}")
+        if not os.path.exists(scaler_path):
+            raise FileNotFoundError(f"Scaler file not found at {scaler_path}")
+            
+        # Load scaler
         ml_scaler = joblib.load(scaler_path)
-        print("Successfully loaded ML model and scaler.")
-    else:
-        print("Warning: ML model or scaler not found at startup.")
-except Exception as e:
-    print(f"Error loading ML model: {e}")
+        print("Scaler successfully loaded.")
+        
+        # Load model
+        ml_model = load_model(model_path)
+        print("TensorFlow model successfully loaded.")
+        
+        # Warm up the model to compile prediction graph in this worker process
+        dummy_input = np.zeros((1, 15))
+        _ = ml_model(dummy_input, training=False)
+        print("Model warm-up complete.")
+        
+    return ml_model, ml_scaler
 
 # Create a blueprint for prediction routes (prefixed with /predict)
 prediction_bp = Blueprint("prediction", __name__)
@@ -49,7 +67,6 @@ prediction_bp = Blueprint("prediction", __name__)
 def predict():
     """
     Show the prediction form (GET) or process a prediction (POST).
-    The ML model integration will be added in a future phase.
     """
 
     if request.method == "POST":
@@ -86,10 +103,17 @@ def predict():
                 raise ValueError("All clinical symptoms must be either Yes or No.")
 
         except (ValueError, TypeError) as e:
+            print(f"Input validation error: {str(e)}")
             flash(f"Invalid input: {str(e)}", "danger")
             return render_template("predict.html", title="Predict")
             
-        if ml_model is None or ml_scaler is None:
+        # Lazy load model & scaler inside worker handling request
+        try:
+            model, scaler = load_ml_resources()
+        except Exception as e:
+            import traceback
+            print(f"CRITICAL: Failed to load ML model or scaler: {str(e)}")
+            traceback.print_exc()
             flash("Machine learning model is currently unavailable. Please contact support.", "warning")
             return redirect(url_for("auth.dashboard"))
 
@@ -100,18 +124,29 @@ def predict():
                 chronic_disease, fatigue, allergy, wheezing, alcohol_consuming,
                 coughing, shortness_of_breath, swallowing_difficulty, chest_pain
             ]
+            print(f"Running prediction for patient '{patient_name}' with features: {input_features}")
             
             features_array = np.array(input_features).reshape(1, -1)
-            scaled_features = ml_scaler.transform(features_array)
+            scaled_features = scaler.transform(features_array)
             
-            probability = ml_model.predict(scaled_features)[0][0]
+            # Using model() functional call is faster, thread-safe, and avoids high-overhead data adapter loops
+            probability_tensor = model(scaled_features, training=False)
+            if hasattr(probability_tensor, 'numpy'):
+                probability = float(probability_tensor.numpy()[0][0])
+            else:
+                probability = float(probability_tensor[0][0])
+                
+            print(f"Prediction result raw probability: {probability}")
             
             prediction_result = 'Positive' if probability > 0.5 else 'Negative'
             confidence_score = float(probability * 100) if prediction_result == 'Positive' else float((1 - probability) * 100)
+            print(f"Outcome: {prediction_result} | Confidence: {confidence_score:.2f}%")
             
         except Exception as e:
+            import traceback
+            print(f"CRITICAL: Error during prediction computation: {str(e)}")
+            traceback.print_exc()
             flash("An error occurred during prediction computation.", "danger")
-            print(f"Prediction error: {str(e)}")
             return redirect(url_for("prediction.predict"))
 
         # ----- Save the prediction record to the database -----

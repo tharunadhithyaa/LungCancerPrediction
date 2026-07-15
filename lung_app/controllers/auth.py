@@ -9,8 +9,8 @@ Handles user registration, login, logout, and the user dashboard.
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 
-from app import db
-from app.models.user import User
+from lung_app import db
+from lung_app.models.user import User
 
 # Create a blueprint for authentication routes (prefixed with /auth)
 auth_bp = Blueprint("auth", __name__)
@@ -140,7 +140,7 @@ def dashboard():
     """
     from sqlalchemy import func
     from datetime import date
-    from app.models.prediction import Prediction
+    from lung_app.models.prediction import Prediction
 
     # Metrics
     total_preds = current_user.predictions.count()

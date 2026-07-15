@@ -11,8 +11,8 @@ implemented in a later phase.
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
-from app import db
-from app.models.prediction import Prediction
+from lung_app import db
+from lung_app.models.prediction import Prediction
 import os
 import numpy as np
 import joblib
@@ -23,7 +23,7 @@ ml_model = None
 ml_scaler = None
 
 # We assume the model is in the 'model' directory at the root of the project.
-# app/controllers/prediction.py -> app/controllers -> app -> root -> model
+# lung_app/controllers/prediction.py -> lung_app/controllers -> lung_app -> root -> model
 model_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'model')
 model_path = os.path.join(model_dir, 'lung_model.h5')
 scaler_path = os.path.join(model_dir, 'scaler.pkl')

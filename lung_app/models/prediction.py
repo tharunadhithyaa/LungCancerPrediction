@@ -9,7 +9,7 @@ score for the user's prediction history.
 
 from datetime import datetime, timezone
 
-from app import db
+from lung_app import db
 
 
 class Prediction(db.Model):

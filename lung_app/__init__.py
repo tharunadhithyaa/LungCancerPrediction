@@ -40,8 +40,8 @@ def create_app(config_name="default"):
     # Create Flask instance with template and static folders
     app = Flask(
         __name__,
-        template_folder="../app/templates",
-        static_folder="../app/static",
+        template_folder="../lung_app/templates",
+        static_folder="../lung_app/static",
     )
 
     # Load configuration from config.py
@@ -59,9 +59,9 @@ def create_app(config_name="default"):
     login_manager.init_app(app)
 
     # ----- Register Blueprints (Controllers) -----
-    from app.controllers.main import main_bp
-    from app.controllers.auth import auth_bp
-    from app.controllers.prediction import prediction_bp
+    from lung_app.controllers.main import main_bp
+    from lung_app.controllers.auth import auth_bp
+    from lung_app.controllers.prediction import prediction_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -69,7 +69,7 @@ def create_app(config_name="default"):
 
     # ----- Create Database Tables -----
     with app.app_context():
-        from app.models import user, prediction  # noqa: F401 — import to register models
+        from lung_app.models import user, prediction  # noqa: F401 — import to register models
         db.create_all()
 
     return app

@@ -39,6 +39,7 @@ LungCancer/
 │   ├── lung_model.h5
 │   └── scaler.pkl
 │
+├── .gitignore            #Ignore all environment secret files .env
 ├── app.py                # Main Application Entry Point
 ├── config.py             # App Configurations
 ├── requirements.txt      # Python Dependencies

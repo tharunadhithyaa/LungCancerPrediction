@@ -8,10 +8,11 @@ Run this file to start the development server:
     python app.py
 """
 
+import os
 from app import create_app
 
-# Create application instance using the development config
-app = create_app("development")
+# Create application instance (reads FLASK_CONFIG env var, defaults to development)
+app = create_app(os.environ.get("FLASK_CONFIG", "development"))
 
 if __name__ == "__main__":
     # Run the Flask development server
